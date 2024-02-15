@@ -13,3 +13,9 @@ And here it is all the wireframe glory of 1989! Of course I updated this later o
 # Release
 
 A prebuild binary is added in the release section.
+
+# Amiga Assembly for VSCode
+
+https://marketplace.visualstudio.com/items?itemName=prb28.amiga-assembly
+
+Use "Amiga Assembly: Create example workspace" into this folder to create an environment for working.

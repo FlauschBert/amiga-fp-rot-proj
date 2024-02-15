@@ -44,16 +44,16 @@ INTENA         = $DFF09A
 OPENLIB:MACRO *\NAME,*\BASE
 
        MOVE.L  EXECBASE,A6
-       LEA     \NAME,A1
+       LEA     \1,A1
        JSR     OPENLIBRARY(A6)
-       MOVE.L  D0,\BASE
+       MOVE.L  D0,\2
 
  ENDM
 
 CLOSELIB:MACRO *\BASE
 
        MOVE.L  EXECBASE,A6
-       MOVE.L  \BASE,A1
+       MOVE.L  \1,A1
        JSR     CLOSELIBRARY(A6)
 
  ENDM
@@ -62,8 +62,8 @@ SETCOLORS:MACRO *\PALETTE,%\COUNT
 
        MOVE.L  GFXBASE,A6
        MOVE.L  VIEWPORT,A0
-       LEA     \PALETTE,A1
-       MOVEQ   #\COUNT,D0
+       LEA     \1,A1
+       MOVEQ   #\2,D0
        JSR     LOADRGB4(A6)
 
  ENDM
@@ -211,7 +211,7 @@ DREHUNG:                       ; X
 
        RTS
 
- ALIGN.L
+ ALIGN 2
 
 WINKEL:        DC.W    0
 WINKEL1:       DC.W    0
@@ -392,7 +392,7 @@ VIEWPORT:      DC.L    0
 GFXNAME:       DC.B    "graphics.library",0
 INTNAME:       DC.B    "intuition.library",0
 
-  ALIGN.L
+  ALIGN 2
 
 STRUKTUR:
               ; RUMPF
@@ -439,7 +439,7 @@ STRUKTUR:
                DC.W       14,  1,-20, 50,  1,-20
                DC.W       50, 11,-28, 50,  1,-20
 
-   ALIGN.L
+   ALIGN 2
 
 BUFFER:        DS.W    300,0
 SCREEN_KOORDS:
