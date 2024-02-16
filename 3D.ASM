@@ -312,8 +312,8 @@ SIN:
        LEA     SINDAT,A6
        MOVE.W  (A6,D6.W),D6
        BTST    #7,D7
-       BEQ     SIN1
-       NEG     D6
+       BEQ.S   SIN1
+       NEG.W   D6
 SIN1:
        RTS
 
