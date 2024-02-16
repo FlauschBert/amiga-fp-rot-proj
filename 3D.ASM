@@ -362,7 +362,7 @@ NEWIRQ:
        movem.l       d0-d7/a0-a6,-(sp)    ; save environment
 
        lea           CUSTOM,a6
-       move.w        #$0020,intena(a6)    ; re-enable VERTB interrupt
+       move.w        #$0020,intreq(a6)    ; re-enable VERTB interrupt
 
        bsr           CLS
        bsr           PROJEKTION
