@@ -8,12 +8,12 @@
 ;*                                             *
 ;***********************************************
 
-; OFFSETS EXEC
+;---------- includes ----------
+       INCDIR        "include"
+       include       "funcdef.i"
+       include       "hw.i"
 
-FORBID         = -132
-PERMIT         = -138
-OPENLIBRARY    = -408
-CLOSELIBRARY   = -414
+       include       "exec/exec_lib.i"
 
 ; OFFSETS INTUITION
 
@@ -33,11 +33,10 @@ CLEARSCREEN    = -048
 
 ; KONSTANTEN
 
-EXECBASE       = 4
+EXECBASE       = $4
 MOUSEBUTTON    = $BFE001
 PUNKTE         = 55
 LINIEN         = 27
-INTENA         = $DFF09A
 
 ;----------------------------------------------------------
 
@@ -45,7 +44,7 @@ OPENLIB:MACRO *\NAME,*\BASE
 
        MOVE.L  EXECBASE,A6
        LEA     \1,A1
-       JSR     OPENLIBRARY(A6)
+       JSR     _LVOOldOpenLibrary(A6)     ; use this on Amiga OS 2.0 (Old)
        MOVE.L  D0,\2
 
  ENDM
@@ -54,7 +53,7 @@ CLOSELIB:MACRO *\BASE
 
        MOVE.L  EXECBASE,A6
        MOVE.L  \1,A1
-       JSR     CLOSELIBRARY(A6)
+       JSR     _LVOCloseLibrary(A6)
 
  ENDM
 
@@ -72,17 +71,17 @@ SETCOLORS:MACRO *\PALETTE,%\COUNT
 
 START:
 
-       OPENLIB     INTNAME,INTBASE
-       OPENLIB     GFXNAME,GFXBASE
-       BSR         OPENSCR
-       SETCOLORS   PALETTE,2
-       BSR         TURN
+       OPENLIB       INTNAME,INTBASE
+       OPENLIB       GFXNAME,GFXBASE
+       BSR           OPENSCR
+       SETCOLORS     PALETTE,2
 
-       MOVE.L  EXECBASE,A6
-       JSR     FORBID(A6)
+       MOVE.L        EXECBASE,A6
+       JSR           _LVODisable(A6)
 
-       BSR     INIT_IRQ
-
+       BSR           TURN                 ; prepare BUFFER
+       BSR           INIT_IRQ
+       
 MAIN_LOOP:
 
        BTST    #6,MOUSEBUTTON
@@ -92,7 +91,7 @@ ENDE:
        BSR     EXIT_IRQ
 
        MOVE.L  EXECBASE,A6
-       JSR     PERMIT(A6)
+       JSR     _LVOEnable(A6)
 
        BSR     CLOSESCR
        CLOSELIB    INTBASE
@@ -271,20 +270,40 @@ MALEN_LOOP:
 ;----------------------------------------------------------
 
 INIT_IRQ:
+       bsr           WAIT_FOR_FLOPPY
 
-       MOVE.W  #$4000,INTENA
-       MOVE.L  $6C,OLDIRQ
-       MOVE.L  #NEWIRQ,$6C
-       MOVE.W  #$C000,INTENA
-       RTS
+       lea           CUSTOM,a6
+
+       move.l        $6c,OLDIRQ                  ; save old jump address / interrupt lvl 3
+       move.w        intenar(a6),OLDINTENA       ; save old interrupt bit mask
+
+       move.l        #NEWIRQ,$6c                 ; set new jump address / interrupt lvl 3
+
+       move.w        #$7fff,intena(a6)           ; clear all interrupts
+       move.w        #$c020,intena(a6)           ; enable interrupt VERTB (bit 5, 14 and 15)
+
+       rts
 
 EXIT_IRQ:
+       lea           CUSTOM,a6
 
-       MOVE.W  #$4000,INTENA
-       MOVE.L  OLDIRQ,$6C
-       MOVE.W  #$C000,INTENA
-       RTS
+       ori.w         #$8000,OLDINTENA            ; add clear bit to saved interrupt bit mask
+       move.w        #$7fff,intena(a6)           ; clear all interrupts
+       move.w        OLDINTENA,intena(a6)        ; restore old interrupt bit mask
 
+       move.l        OLDIRQ,$6c                  ; install old subroutine
+
+       rts
+
+;----------------------------------------------------------
+
+WAIT_FOR_FLOPPY:
+       move.l #600000,d0
+
+WAIT_FOR_FLOPPY_LOOP:
+       dbne d0,WAIT_FOR_FLOPPY_LOOP
+
+       rts
 
 ;----------------------------------------------------------
 
@@ -318,7 +337,8 @@ CLS:
        MOVE.L  (A5),A1
        MOVE.W  #10240,D0
        MOVEQ   #0,D1
-       JMP     BLITCLEAR(A6)
+       JSR     BLITCLEAR(A6)
+       RTS
 
 ;----------------------------------------------------------
 
@@ -335,6 +355,23 @@ SIN:
        NEG     D6
 SIN1:
        RTS
+
+;----------------------------------------------------------
+
+NEWIRQ:
+       movem.l       d0-d7/a0-a6,-(sp)    ; save environment
+
+       lea           CUSTOM,a6
+       move.w        #$0020,intena(a6)    ; re-enable VERTB interrupt
+
+       bsr           CLS
+       bsr           PROJEKTION
+       bsr           MALEN
+       bsr           TURN
+
+       movem.l       (sp)+,d0-d7/a0-a6    ; restore environment
+
+       rts
 
 ;----------------------------------------------------------
 
@@ -358,17 +395,9 @@ SINDAT:
        DC.W    $0C7C,$0AF1,$0964,$07D6,$0646,$04B5,$0324,$0192
        DC.W    0,0
 
-NEWIRQ:
 
-       BSR     CLS
-       BSR     PROJEKTION
-       BSR     MALEN
-       BSR     TURN
-
-IRQ_ENDE:
-
-       DC.W    $4EF9
-OLDIRQ: DC.L 0
+OLDIRQ:       dc.l   0
+OLDINTENA:    dc.w   0
 
 
 SCREENDEVS:
