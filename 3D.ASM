@@ -66,7 +66,7 @@ START:
        SETCOLORS     PALETTE,2
 
        MOVE.L        EXECBASE,A6
-       JSR           _LVODisable(A6)
+       JSR           _LVOForbid(A6)
 
        BSR           TURN                 ; prepare BUFFER
        BSR           INIT_IRQ
@@ -80,7 +80,7 @@ ENDE:
        BSR     EXIT_IRQ
 
        MOVE.L  EXECBASE,A6
-       JSR     _LVOEnable(A6)
+       JSR     _LVOPermit(A6)
 
        BSR     CLOSESCR
        CLOSELIB    INTBASE
@@ -241,12 +241,11 @@ MALEN:
        MOVEQ   #LINIEN,D7 
 
 MALEN_LOOP:
-       MOVE.L  RASTPORT,a1
+       MOVE.L  RASTPORT,a1         ; draw may clear a1
        MOVE.W  (a5)+,D0
        MOVE.W  (a5)+,D1
        CALLGRAF Move
 
-       MOVE.L  RASTPORT,a1
        MOVE.W  (a5)+,D0
        MOVE.W  (a5)+,D1
        CALLGRAF Draw
