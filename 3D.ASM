@@ -14,22 +14,12 @@
        include       "hw.i"
 
        include       "exec/exec_lib.i"
+       include       "graphics/graphics_lib.i"
 
 ; OFFSETS INTUITION
 
 OPENSCREEN     = -198
 CLOSESCREEN    = -066
-SCREENTOFRONT  = -252
-
-; OFFSETS GRAPHICS
-
-LOADRGB4       = -192
-DRAWTO         = -246
-MOVEPEN        = -240
-BLITCLEAR      = -300
-SETAPEN        = -342
-WRITEPIX       = -324
-CLEARSCREEN    = -048
 
 ; KONSTANTEN
 
@@ -59,11 +49,10 @@ CLOSELIB:MACRO *\BASE
 
 SETCOLORS:MACRO *\PALETTE,%\COUNT
 
-       MOVE.L  GFXBASE,A6
        MOVE.L  VIEWPORT,A0
        LEA     \1,A1
        MOVEQ   #\2,D0
-       JSR     LOADRGB4(A6)
+       CALLGRAF LoadRGB4
 
  ENDM
 
@@ -72,7 +61,7 @@ SETCOLORS:MACRO *\PALETTE,%\COUNT
 START:
 
        OPENLIB       INTNAME,INTBASE
-       OPENLIB       GFXNAME,GFXBASE
+       OPENLIB       GFXNAME,_GfxBase
        BSR           OPENSCR
        SETCOLORS     PALETTE,2
 
@@ -95,7 +84,7 @@ ENDE:
 
        BSR     CLOSESCR
        CLOSELIB    INTBASE
-       CLOSELIB    GFXBASE
+       CLOSELIB    _GfxBase
 
        RTS
 
@@ -248,20 +237,19 @@ PROJEKTION_LOOP:
 ;----------------------------------------------------------
 
 MALEN:
-
-       MOVE.L  GFXBASE,A6
-       LEA     SCREEN_KOORDS,A4
-       MOVEQ   #LINIEN,D7
-       MOVE.L  RASTPORT,A1
+       LEA     SCREEN_KOORDS,a5
+       MOVEQ   #LINIEN,D7 
 
 MALEN_LOOP:
-       MOVE.W  (A4)+,D0
-       MOVE.W  (A4)+,D1
-       JSR     MOVEPEN(A6)
+       MOVE.L  RASTPORT,a1
+       MOVE.W  (a5)+,D0
+       MOVE.W  (a5)+,D1
+       CALLGRAF Move
 
-       MOVE.W  (A4)+,D0
-       MOVE.W  (A4)+,D1
-       JSR     DRAWTO(A6)
+       MOVE.L  RASTPORT,a1
+       MOVE.W  (a5)+,D0
+       MOVE.W  (a5)+,D1
+       CALLGRAF Draw
 
        DBRA    D7,MALEN_LOOP
        RTS
@@ -291,14 +279,13 @@ CLOSESCR:
 
 CLS:
 
-       MOVE.L  GFXBASE,A6
-       MOVE.L  RASTPORT,A5
+       MOVE.L  RASTPORT,a5
        MOVEQ   #108,D0
-       ADD.L   D0,A5
-       MOVE.L  (A5),A1
-       MOVE.W  #10240,D0
-       MOVEQ   #0,D1
-       JSR     BLITCLEAR(A6)
+       ADD.L   d0,a5
+       MOVE.L  (a5),a1
+       MOVE.W  #10240,d0
+       MOVEQ   #0,d1
+       CALLGRAF BltClear
        RTS
 
 ;----------------------------------------------------------
@@ -323,7 +310,7 @@ WAIT_FOR_FLOPPY:
        move.l #600000,d0
 
 WAIT_FOR_FLOPPY_LOOP:
-       dbne d0,WAIT_FOR_FLOPPY_LOOP
+       dbra d0,WAIT_FOR_FLOPPY_LOOP
 
        rts
 
@@ -417,6 +404,7 @@ SCREENHD:      DC.L    0
 RASTPORT:      DC.L    0
 VIEWPORT:      DC.L    0
 
+_GfxBase      dc.l 0
 GFXNAME:       DC.B    "graphics.library",0
 INTNAME:       DC.B    "intuition.library",0
 
