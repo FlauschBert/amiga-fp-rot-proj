@@ -241,11 +241,12 @@ MALEN:
        MOVEQ   #LINIEN,D7 
 
 MALEN_LOOP:
-       MOVE.L  RASTPORT,a1         ; draw may clear a1
+       MOVE.L  RASTPORT,a1
        MOVE.W  (a5)+,D0
        MOVE.W  (a5)+,D1
        CALLGRAF Move
 
+       MOVE.L  RASTPORT,a1
        MOVE.W  (a5)+,D0
        MOVE.W  (a5)+,D1
        CALLGRAF Draw
@@ -324,9 +325,7 @@ INIT_IRQ:
        move.w        intenar(a6),OLDINTENA       ; save old interrupt bit mask
 
        move.l        #NEWIRQ,$6c                 ; set new jump address / interrupt lvl 3
-
-       move.w        #$7fff,intena(a6)           ; clear all interrupts
-       move.w        #$c020,intena(a6)           ; enable interrupt VERTB (bit 5, 14 and 15)
+       move.w        #$c000,intena(a6)           ; enable interrupt VERTB (bit 5, 14 and 15)
 
        rts
 
@@ -345,9 +344,6 @@ EXIT_IRQ:
 
 NEWIRQ:
        movem.l       d0-d7/a0-a6,-(sp)    ; save environment
-
-       lea           CUSTOM,a6
-       move.w        #$0020,intreq(a6)    ; re-enable VERTB interrupt
 
        bsr           CLS
        bsr           PROJEKTION
