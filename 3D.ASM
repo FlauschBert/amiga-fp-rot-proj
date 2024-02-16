@@ -266,45 +266,6 @@ MALEN_LOOP:
        DBRA    D7,MALEN_LOOP
        RTS
 
-
-;----------------------------------------------------------
-
-INIT_IRQ:
-       bsr           WAIT_FOR_FLOPPY
-
-       lea           CUSTOM,a6
-
-       move.l        $6c,OLDIRQ                  ; save old jump address / interrupt lvl 3
-       move.w        intenar(a6),OLDINTENA       ; save old interrupt bit mask
-
-       move.l        #NEWIRQ,$6c                 ; set new jump address / interrupt lvl 3
-
-       move.w        #$7fff,intena(a6)           ; clear all interrupts
-       move.w        #$c020,intena(a6)           ; enable interrupt VERTB (bit 5, 14 and 15)
-
-       rts
-
-EXIT_IRQ:
-       lea           CUSTOM,a6
-
-       ori.w         #$8000,OLDINTENA            ; add clear bit to saved interrupt bit mask
-       move.w        #$7fff,intena(a6)           ; clear all interrupts
-       move.w        OLDINTENA,intena(a6)        ; restore old interrupt bit mask
-
-       move.l        OLDIRQ,$6c                  ; install old subroutine
-
-       rts
-
-;----------------------------------------------------------
-
-WAIT_FOR_FLOPPY:
-       move.l #600000,d0
-
-WAIT_FOR_FLOPPY_LOOP:
-       dbne d0,WAIT_FOR_FLOPPY_LOOP
-
-       rts
-
 ;----------------------------------------------------------
 
 OPENSCR:
@@ -358,6 +319,44 @@ SIN1:
 
 ;----------------------------------------------------------
 
+WAIT_FOR_FLOPPY:
+       move.l #600000,d0
+
+WAIT_FOR_FLOPPY_LOOP:
+       dbne d0,WAIT_FOR_FLOPPY_LOOP
+
+       rts
+
+;----------------------------------------------------------
+
+INIT_IRQ:
+       bsr           WAIT_FOR_FLOPPY
+
+       lea           CUSTOM,a6
+
+       move.l        $6c,OLDIRQ                  ; save old jump address / interrupt lvl 3
+       move.w        intenar(a6),OLDINTENA       ; save old interrupt bit mask
+
+       move.l        #NEWIRQ,$6c                 ; set new jump address / interrupt lvl 3
+
+       move.w        #$7fff,intena(a6)           ; clear all interrupts
+       move.w        #$c020,intena(a6)           ; enable interrupt VERTB (bit 5, 14 and 15)
+
+       rts
+
+EXIT_IRQ:
+       lea           CUSTOM,a6
+
+       ori.w         #$8000,OLDINTENA            ; add clear bit to saved interrupt bit mask
+       move.w        #$7fff,intena(a6)           ; clear all interrupts
+       move.w        OLDINTENA,intena(a6)        ; restore old interrupt bit mask
+
+       move.l        OLDIRQ,$6c                  ; install old subroutine
+
+       rts
+
+;----------------------------------------------------------
+
 NEWIRQ:
        movem.l       d0-d7/a0-a6,-(sp)    ; save environment
 
@@ -371,7 +370,7 @@ NEWIRQ:
 
        movem.l       (sp)+,d0-d7/a0-a6    ; restore environment
 
-       rts
+       rte
 
 ;----------------------------------------------------------
 
