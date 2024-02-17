@@ -2,7 +2,7 @@
 
 This project is about programming the Amiga in Assembler. The focus of this project is on 3D graphics with the very limited resources for it on the Amiga platform.
 
-I named it "open heart project" because programming on the Amiga in Assembler feels like programming with all the other programmers from Commodore. The people who wrote the underlying Kickstart or even the AmigaOS. Even in the "Amiga ROM Kernel Reference Manual Libraries" book in the "Exec Library" section about "Exec interrupts" you can read that messing with registers of other programmers is not a good idea. I felt so, when I was using the `Move` and `Draw` commands of the graphics.library and the address register `a1` (holding the rasterport address) was zeroed all the time after execution.
+I named it "open heart project" because programming on the Amiga in Assembler feels like performing a surgery on an open heart. It feels like programming with all the other programmers from Commodore at the same time. The people who wrote the underlying Kickstart or even the AmigaOS. Even in the "Amiga ROM Kernel Reference Manual Libraries" book in the "Exec Library" section about "Exec interrupts" you can read that messing with registers of other programmers is not a good idea. I felt so, when I was using the `Move` and `Draw` commands of the graphics.library and the address register `a1` (holding the rasterport address) was zeroed all the time after execution.
 
 Thanks to the project in https://github.com/LutzGrosshennig/amiga-simple3d I can start with a line drawing version of an aircraft. It already contains the tricky parts for rotation and projection and runs out of the box on Kickstart 1.3.
 
