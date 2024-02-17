@@ -21,7 +21,7 @@ Fortunately, there are many of the good old even german books to be found in the
 
 ## Amiga Assembly for VSCode extension
 
-Still in development but very helpful. With the extension comes all you need for developing. Even the emulator with the Kickstart ROM is included.  
+Still in development but very helpful. With the extension comes all you need for developing.
 
 https://marketplace.visualstudio.com/items?itemName=prb28.amiga-assembly
 
