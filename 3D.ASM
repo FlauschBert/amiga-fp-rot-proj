@@ -34,7 +34,8 @@ OPENLIB:MACRO *\NAME,*\BASE
 
        MOVE.L  EXECBASE,A6
        LEA     \1,A1
-       JSR     _LVOOldOpenLibrary(A6)     ; use this on Amiga OS 2.0 (Old)
+       move.l  #34,d0
+       JSR     _LVOOpenLibrary(A6)     ; use this on Amiga OS 2.0 (Old)
        MOVE.L  D0,\2
 
  ENDM
@@ -345,11 +346,17 @@ EXIT_IRQ:
 NEWIRQ:
        movem.l       d0-d7/a0-a6,-(sp)    ; save environment
 
+       lea           _GfxBase,a6          ; draw only once per vblank
+       CALLGRAF      VBeamPos(a6)         ; to avoid flickering
+       sub.w         #250,d0
+       bmi.s         NEWIRQ_END         
+
        bsr           CLS
        bsr           PROJEKTION
        bsr           MALEN
        bsr           TURN
 
+NEWIRQ_END:
        movem.l       (sp)+,d0-d7/a0-a6    ; restore environment
 
        rte
