@@ -346,8 +346,8 @@ EXIT_IRQ:
 NEWIRQ:
        movem.l       d0-d7/a0-a6,-(sp)    ; save environment
 
-       lea           _GfxBase,a6          ; draw only once per vblank
-       CALLGRAF      VBeamPos(a6)         ; to avoid flickering
+                                          ; draw only once per vblank
+       CALLGRAF      VBeamPos             ; to avoid flickering
        sub.w         #250,d0
        bmi.s         NEWIRQ_END         
 
