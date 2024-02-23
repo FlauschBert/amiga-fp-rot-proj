@@ -103,7 +103,7 @@ TURN_LOOP:
        MOVE.W  (A0)+,D2       ; Y
        MOVE.W  (A0)+,D3       ; Z
 
-       BSR     DREHUNG        ; UM ACHSEN
+       BSR.s     DREHUNG        ; UM ACHSEN
 
        MOVE.W  D1,(A1)+
        MOVE.W  D2,(A1)+
@@ -348,7 +348,7 @@ NEWIRQ:
 
                                           ; draw only once per vblank
        CALLGRAF      VBeamPos             ; to avoid flickering
-       sub.w         #250,d0
+       sub.w         #256,d0
        bmi.s         NEWIRQ_END         
 
        bsr           CLS
